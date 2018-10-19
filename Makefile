@@ -4,7 +4,7 @@ include versioning.mk
 
 # dockerized development environment variables
 REPO_PATH := github.com/deis/${SHORT_NAME}
-DEV_ENV_IMAGE := quay.io/deis/go-dev:v0.22.0
+DEV_ENV_IMAGE := quay.io/deis/go-dev:v0.22.0 # see also the first stage of the Dockerfile
 DEV_ENV_WORK_DIR := /go/src/${REPO_PATH}
 DEV_ENV_PREFIX := docker run --rm -v ${CURDIR}:${DEV_ENV_WORK_DIR} -w ${DEV_ENV_WORK_DIR}
 DEV_ENV_CMD := ${DEV_ENV_PREFIX} ${DEV_ENV_IMAGE}
@@ -27,9 +27,6 @@ bootstrap:
 glideup:
 	${DEV_ENV_CMD} glide up
 
-# This illustrates a two-stage Docker build. docker-compile runs inside of
-# the Docker environment. Other alternatives are cross-compiling, doing
-# the build as a `docker build`.
 build:
 	${DEV_ENV_CMD} go build -ldflags ${LDFLAGS} -o ${BINARY_DEST_DIR}/boot boot.go
 	${DEV_ENV_CMD} upx -9 ${BINARY_DEST_DIR}/boot
@@ -45,8 +42,8 @@ test-unit:
 test-cover:
 	${DEV_ENV_CMD} test-cover.sh
 
-docker-build: build
-	docker build ${DOCKER_BUILD_FLAGS} -t ${IMAGE} rootfs
+docker-build:
+	docker build ${DOCKER_BUILD_FLAGS} -f rootfs/Dockerfile -t ${IMAGE} .
 	docker tag ${IMAGE} ${MUTABLE_IMAGE}
 
 check-kubectl:

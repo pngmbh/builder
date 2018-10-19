@@ -1,4 +1,14 @@
+FROM quay.io/deis/go-dev:v0.22.0 as go-build
+
+WORKDIR /go/src/github.com/deis/builder
+COPY . ./
+RUN make bootstrap DEV_ENV_CMD=
+RUN make build DEV_ENV_CMD=
+
 FROM quay.io/deis/base:v0.3.6
+
+COPY --from=go-build /go/src/github.com/deis/builder/rootfs/usr/bin/boot /usr/bin/boot
+RUN chmod +x /usr/bin/boot
 
 RUN adduser --system \
 	--shell /bin/bash \
@@ -42,7 +52,7 @@ RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E1DF1F24 && \
         /usr/lib/x86_64-linux-gnu/gconv/EBC* && \
     bash -c "mkdir -p /usr/share/man/man{1..8}"
 
-COPY . /
+COPY rootfs/ /
 
 CMD ["/usr/bin/boot", "server"]
 EXPOSE 2223
