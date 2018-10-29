@@ -4,7 +4,7 @@ include versioning.mk
 
 # dockerized development environment variables
 REPO_PATH := github.com/deis/${SHORT_NAME}
-DEV_ENV_IMAGE := quay.io/deis/go-dev:v0.22.0 # see also the first stage of the Dockerfile
+DEV_ENV_IMAGE := quay.io/deis/go-dev:v1.17.2 # see also the first stage of the Dockerfile
 DEV_ENV_WORK_DIR := /go/src/${REPO_PATH}
 DEV_ENV_PREFIX := docker run --rm -v ${CURDIR}:${DEV_ENV_WORK_DIR} -w ${DEV_ENV_WORK_DIR}
 DEV_ENV_CMD := ${DEV_ENV_PREFIX} ${DEV_ENV_IMAGE}
@@ -34,7 +34,7 @@ build:
 test: test-style test-unit
 
 test-style:
-	${DEV_ENV_CMD} lint
+	${DEV_ENV_CMD} sh -c 'sed -i "s/--deadline=20s/--deadline=600s/" `which lint`; lint'
 
 test-unit:
 	${DEV_ENV_CMD} sh -c '${GOTEST} $$(glide nv)'

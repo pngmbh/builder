@@ -1,4 +1,4 @@
-FROM quay.io/deis/go-dev:v0.22.0 as go-build
+FROM quay.io/deis/go-dev:v1.17.2 as go-build
 
 WORKDIR /go/src/github.com/deis/builder
 COPY . ./
